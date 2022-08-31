@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.signal.resume.dao.ResumeDAO">
+
+	<select id="list" resultType="resume" parameterType="String">
+		SELECT re_no, re_title, re_regDate, jp_name, jc_name FROM resume r
+		LEFT OUTER JOIN job_pa jp ON r.jp_no = jp.jp_no
+		LEFT OUTER JOIN job_ch jc ON r.jc_no = jc.jc_no  
+		WHERE cl_id=#{id} AND re_hidden = 1
+		ORDER BY re_no DESC
+	</select>
+	
+	<update id="resumeDelete">
+	UPDATE resume SET 
+	re_hidden = 0
+	WHERE re_no = #{param1}
+	</update>
+	
+	<!-- 필요한 컬럼 추가했습니다. by태섭 -->
+	<select id="personList" resultType="resume">
+		SELECT cl_age, cl_gender, format((SUM(inter_score)/COUNT(inter_score)),2) AS avr_inter_grade,  r.re_title , c.cl_id,
+		COUNT(DISTINCT inter_comment) as cnt_inter, format((SUM(st_score)/COUNT(st_comment)),1) AS avr_st_score FROM client c 
+		LEFT OUTER JOIN self_test_result str ON c.cl_id = str.cl_id 
+		LEFT OUTER JOIN interview i ON c.cl_id = i.cl_id
+		LEFT OUTER JOIN interview_test_result itr ON itr.inter_no = i.inter_no 		
+		left outer join resume r on r.cl_id = c.cl_id 
+		GROUP BY c.cl_id 
+		LIMIT #{skip},10
+	</select>
+	
+	<select id="personListTotal" resultType="int">
+	SELECT count(cl_id)
+	FROM client
+	</select>
+	
+	<select id="personListSearch" resultType="resume">
+		SELECT cl_age, cl_gender,  format((SUM(inter_score)/COUNT(inter_result)),2) AS avr_inter_grade,  r.re_title , c.cl_id,
+		COUNT(DISTINCT inter_comment) as cnt_inter, format((SUM(st_score)/COUNT(st_comment)),1) AS avr_st_score FROM client c 
+		LEFT OUTER JOIN self_test_result str ON c.cl_id = str.cl_id 
+		LEFT OUTER JOIN interview i ON c.cl_id = i.cl_id
+		left outer join resume r on r.cl_id = c.cl_id 	
+		LEFT OUTER JOIN interview_test_result itr ON itr.inter_no = i.inter_no 	
+		WHERE
+		<if test="param1=0">
+			cl_age between #{param2} and #{param3}
+			GROUP BY c.cl_id
+		</if>
+		<if test="param1=1">
+			cl_age between #{param2} and #{param3}
+			GROUP BY c.cl_id
+			ORDER BY avr_inter_grade DESC
+		</if>		
+		LIMIT #{param4},10
+	</select>
+	
+	<select id="personSearchTotal" resultType="int">
+		SELECT count(c.cl_id) FROM client c		
+		WHERE cl_age between #{param2} and #{param3}			
+	</select>
+	
+	<select id="resumeDetail" resultType="resume" parameterType="String">
+	SELECT re_title, re_fn_status, re_sch_name, re_sch_period, re_major, re_average, re_total, re_register, re_intro, re_portfolio, re_portfolio_ori,r.jp_no,r.jc_no, jp_name, jc_name
+	,cl_name, cl_call, cl_address, cl_birth, cl_email, cl_gender, cl_photo, cl_age, reco_no FROM resume r 
+	LEFT OUTER JOIN job_pa jp ON jp.jp_no = r.jp_no
+	LEFT OUTER JOIN job_ch jc ON jc.jc_no = r.jc_no 
+	LEFT OUTER JOIN client c ON c.cl_id = r.cl_id
+	WHERE r.re_no = #{re_no}
+	</select>
+	
+	<select id="careerDetail" resultType="resume" parameterType="String">
+	SELECT r.re_no, ca_no, ca_com_name, ca_period, ca_job, ca_content FROM career c 
+	LEFT OUTER JOIN resume r ON c.re_no = r.re_no
+	WHERE r.re_no = #{re_no}
+	</select>
+	
+	<select id="socialDetail" resultType="resume" parameterType="String">
+	SELECT r.re_no, soc_no, soc_field, soc_name, soc_content, soc_period FROM social s 
+	LEFT OUTER JOIN resume r ON s.re_no = r.re_no
+	WHERE r.re_no = #{re_no}
+	</select>
+	
+	<select id="licenseDetail" resultType="resume" parameterType="String">
+	SELECT r.re_no, li_no, li_field, li_date, li_org, li_name FROM license l 
+	LEFT OUTER JOIN resume r ON l.re_no = r.re_no
+	WHERE r.re_no = #{re_no}
+	</select>
+	
+	<select id="recommendDetail" resultType="resume" parameterType="String">
+	SELECT r.reco_no, reco_cl_id, reco_req_memo, reco_date FROM resume r
+	LEFT OUTER JOIN recommend r2 ON r.reco_no = r2.reco_no
+	WHERE r.re_no = #{re_no}
+	</select>
+	
+	<select id="recommendUp" resultType="resume" parameterType="String">
+	SELECT reco_no, reco_cl_id, reco_req_memo, reco_date FROM recommend r
+	WHERE cl_id = #{id} AND reco_req_memo != ""
+	</select>
+	
+	<select id="resumeRegDetail" resultType="resume" parameterType="String">
+	SELECT cl_name, cl_call, cl_address, cl_birth, cl_email, cl_gender, cl_photo, cl_age FROM client c	
+	WHERE cl_id = #{id}
+	</select>
+	
+	<insert id="resumeRegB"
+		useGeneratedKeys="true"
+		keyColumn="re_no"
+		keyProperty="re_no" 
+		parameterType="resume">
+	INSERT INTO resume(cl_id, re_title, re_fn_status, re_sch_name, re_sch_period, re_major, re_average, re_total, re_register, re_intro)
+	VALUES (#{cl_id},#{re_title},#{re_fn_status},#{re_sch_name},#{re_sch_period},#{re_major},#{re_average},#{re_total},#{re_register},#{re_intro})
+	</insert>
+	
+	<update id="resumeReg">
+	UPDATE resume SET 
+	jp_no = #{param1}, 
+	jc_no = #{param2}
+	WHERE re_no = #{param3}
+	</update>
+	
+	<update id="recoReg">
+	UPDATE resume SET 
+	reco_no = #{param2}	
+	WHERE re_no = #{param1}
+	</update>
+	
+	<update id="portfolioUp">
+	UPDATE resume SET 
+	re_portfolio = #{param2}, 
+	re_portfolio_ori = #{param3}
+	WHERE re_no = #{param1}
+	</update>
+	
+	<select id="jpList" resultType="resume">
+		SELECT jp_no, jp_name, jp_hidden FROM job_pa
+		WHERE jp_hidden=1
+	</select>
+	
+	<select id="jcList" resultType="resume" parameterType="String">
+		SELECT jp_no, jc_no, jc_name, jc_hidden FROM job_ch
+		WHERE jp_no=#{jp_no} AND jc_hidden=1
+	</select>
+	
+	<select id="jcCheck" resultType="resume" parameterType="String">
+		SELECT jc.jp_no, jc_no, jp_name, jc_name, jc_hidden FROM job_ch jc 
+		LEFT OUTER JOIN job_pa jp on jp.jp_no = jc.jp_no 
+		WHERE jc_no=#{jc_no};
+	</select>
+	
+	<insert id="careerReg" parameterType="hashmap">
+	INSERT INTO career(re_no, ca_com_name, ca_period, ca_job, ca_content)
+	VALUES (#{re_no},#{ca_com_name},#{ca_period},#{ca_job},#{ca_content})
+	</insert>
+	
+	<insert id="socialReg" parameterType="hashmap">
+	INSERT INTO social(re_no, soc_field, soc_name, soc_period, soc_content)
+	VALUES (#{re_no},#{soc_field},#{soc_name},#{soc_period},#{soc_content})
+	</insert>
+	
+	<insert id="licenseReg" parameterType="hashmap">
+	INSERT INTO license(re_no, li_field, li_name, li_org, li_date)
+	VALUES (#{re_no},#{li_field},#{li_name},#{li_org},#{li_date})
+	</insert>
+	
+	<update id="recommendReg" parameterType="hashmap">
+	UPDATE resume SET
+	reco_no=#{reco_no}
+	WHERE re_no=#{re_no}
+	</update>
+	
+	<select id="recommendMe" resultType="resume" parameterType="String">
+		SELECT reco_no, cl_id, reco_cl_id, reco_req_memo,reco_relation, reco_date FROM recommend
+		WHERE cl_id=#{id} 
+	</select>
+	
+	<!-- <select id="recommendYou" resultType="resume" parameterType="String">
+		SELECT reco_no, cl_id, reco_req_memo, reco_content, reco_state, reco_relation, reco_date FROM recommend
+		WHERE reco_cl_id=#{id} 
+	</select> -->
+	
+	<select id="recommendUlist" resultType="resume" parameterType="String">
+		SELECT reco_no, cl_id, reco_req_memo, reco_content, reco_state, reco_relation, reco_date FROM recommend
+		WHERE reco_cl_id=#{id} 
+	</select>
+	
+	<update id="careerUp" parameterType="hashmap">
+	UPDATE career SET
+	ca_com_name=#{ca_com_name},
+	ca_period=#{ca_period},
+	ca_job=#{ca_job},
+	ca_content=#{ca_content}
+	WHERE ca_no=#{ca_no}
+	</update>
+	
+	<update id="socialUp" parameterType="hashmap">
+	UPDATE social SET
+	soc_field=#{soc_field},
+	soc_name=#{soc_name},
+	soc_period=#{soc_period},
+	soc_content=#{soc_content}
+	WHERE soc_no=#{soc_no}
+	</update>
+	
+	<update id="licenseUp" parameterType="hashmap">
+	UPDATE license SET
+	li_field=#{li_field},
+	li_name=#{li_name},
+	li_org=#{li_org},
+	li_date=#{li_date}
+	WHERE li_no=#{li_no}
+	</update>
+	
+	<delete id="careerDelete" parameterType="String">
+	DELETE FROM career WHERE ca_no = #{ca_no}
+	</delete>
+	
+	<delete id="socialDelete" parameterType="String">
+	DELETE FROM social WHERE soc_no = #{soc_no}
+	</delete>
+	
+	<delete id="licenseDelete" parameterType="String">
+	DELETE FROM license WHERE li_no = #{li_no}
+	</delete>
+	
+	<insert id="careerAddUp">
+	INSERT INTO career (re_no , ca_com_name, ca_period, ca_job, ca_content)
+	SELECT #{param2}, ca_com_name , ca_period , ca_job , ca_content from career where re_no = #{param1};
+	</insert>
+	
+	<insert id="socialAddUp">
+	INSERT INTO social (re_no , soc_field , soc_name , soc_content , soc_period)
+	SELECT #{param2}, soc_field , soc_name , soc_content , soc_period from social where re_no = #{param1};
+	</insert>
+	
+	<insert id="licenseAddUp">
+	INSERT INTO license (re_no , li_field, li_name, li_org, li_date)
+	SELECT #{param2}, li_field , li_name , li_org , li_date from license where re_no = #{param1};
+	</insert>
+	
+	
+</mapper>

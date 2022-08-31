@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.signal.enter.dao.EnterDAO">
+	
+	<!-- by태섭, 입사제안리스트 호출 / companyOfferList.jsp -->
+	<!-- <select id="offerList" resultType="com.signal.all.dto.EnterDTO">
+	SELECT
+		off.offer_date
+		,jp.jpo_title
+		,cl.cl_name
+		,cl.cl_age
+		,cl.cl_gender
+		,(SELECT sum(inter_grade)/count(inter_comment) GROUP BY cl.cl_id) AS inter_grade_avg
+		,(SELECT count(inter_comment) FROM interview i WHERE cl.cl_id = i.cl_id GROUP BY cl.cl_id) AS gradeCnt
+		,(SELECT avg(st_score) FROM self_test_result str  WHERE cl.cl_id = str.cl_id GROUP BY cl.cl_id) AS st_score_avg
+	FROM offer off
+	LEFT OUTER JOIN client cl ON off.cl_id = cl.cl_id 
+	LEFT OUTER JOIN interview i ON i.cl_id = cl.cl_id  
+	LEFT OUTER JOIN self_test_result str ON str.cl_id = cl.cl_id
+	LEFT OUTER JOIN job_posting jp ON jp.jpo_no = off.jpo_no
+	LEFT OUTER JOIN company c ON c.com_id = jp.com_id
+	WHERE c.com_id = #{param1} ORDER BY off.offer_no DESC
+	LIMIT #{param2}, #{param3};
+	</select>  --> 
+	
+	<!-- by태섭, 입사제안리스트 호출 / companyOfferList2.jsp-->
+	<select id="offerList" resultType="com.signal.all.dto.EnterDTO">
+	SELECT
+		off.offer_date
+		,jp.jpo_title
+		,cl.cl_name
+		,cl.cl_age
+		,cl.cl_gender
+		,off.reading_state
+	FROM offer off
+	LEFT OUTER JOIN client cl ON off.cl_id = cl.cl_id 
+	LEFT OUTER JOIN job_posting jp ON jp.jpo_no = off.jpo_no
+	LEFT OUTER JOIN company c ON c.com_id = jp.com_id
+	WHERE c.com_id = #{param1} ORDER BY off.offer_no DESC
+	LIMIT #{param2}, #{param3};
+	</select>
+	
+	<!-- by태섭, 기업 회원한 입사제안 총 개수 -->
+	<select id="getComOfferTotal" resultType="int">
+	SELECT count(*) FROM offer o
+	LEFT OUTER JOIN job_posting jp  ON jp.jpo_no = o.jpo_no 
+	LEFT OUTER JOIN company c on c.com_id = jp.com_id 
+	WHERE c.com_id = #{param1};
+	</select>
+	
+	<!-- by태섭, 기업 채용공고 리스트 -->
+	<select id="jobPostingList" resultType="com.signal.all.dto.EnterDTO">
+	SELECT jpo_title, jpo_no FROM job_posting WHERE com_id = #{com_id}
+	</select>
+	
+	<!-- by태섭, 인재현황 입사제안 페이지 -> 인재정보 가져오는 쿼리문 -->
+	<select id="personInfo" resultType="com.signal.all.dto.ResumeDTO">
+	SELECT 
+		c.cl_age
+		,c.cl_gender
+		,(SUM(inter_grade)/COUNT(inter_comment)) AS avr_inter_grade
+		,c.cl_id 
+		,jp.jpo_title 
+		,COUNT(DISTINCT inter_comment) as cnt_inter
+		,(SUM(st_score)/COUNT(st_comment)) AS avr_st_score 
+	FROM client c 
+	LEFT OUTER JOIN self_test_result str ON c.cl_id = str.cl_id 
+	LEFT OUTER JOIN interview i ON c.cl_id = i.cl_id
+	LEFT OUTER JOIN job_posting jp ON jp.jpo_no = i.jpo_no
+	WHERE c.cl_id = #{param1}	
+	</select>
+	
+	<!-- by태섭, 기업이 일반회원에게 입사제안 쿼리 -->
+	<insert id="offer">
+	INSERT INTO offer(
+		cl_id, jpo_no, reading_state, offer_state
+	)VALUES(
+		#{param1}, #{param2}, '미열람', '1'
+	)
+	</insert>
+	
+	<!-- by태섭, 공고 클릭했을 때 열람여부 변경 -->
+	<update id="upHit">
+	UPDATE offer SET reading_state = "열람" WHERE offer_no = #{param1}
+	</update>
+	
+	<!-- by태섭, 받은 제안 리스트 보여주기 -->
+	<!-- <select id="clientOfferList" resultType="com.signal.all.dto.EnterDTO">
+	SELECT 
+		o.offer_no 
+		,o.reading_state
+		,o.offer_date
+		,jp.jpo_title
+		,c.com_name
+		,jp.jpo_no 
+		,o.offer_state
+	FROM offer o 
+	LEFT OUTER JOIN job_posting jp ON o.jpo_no = jp.jpo_no 
+	LEFT OUTER JOIN company c ON jp.com_id = c.com_id
+	WHERE o.offer_state = "1"
+	</select> -->
+	
+	<!-- by태섭, 받은 제안 페이징 처리한 리스트 보여주기 -->
+	<select id="clientOfferList" resultType="com.signal.all.dto.EnterDTO">
+	SELECT 
+		o.offer_no 
+		,o.reading_state
+		,o.offer_date
+		,jp.jpo_title
+		,c.com_name
+		,c.com_id
+		,jp.jpo_no 
+		,o.offer_state
+	FROM offer o 
+	LEFT OUTER JOIN job_posting jp ON o.jpo_no = jp.jpo_no 
+	LEFT OUTER JOIN company c ON jp.com_id = c.com_id
+	LEFT OUTER JOIN client cl on cl.cl_id = o.cl_id
+	WHERE o.offer_state = "1" AND cl.cl_id = #{param1}
+	ORDER BY o.offer_no DESC
+	LIMIT #{param2}, #{param3};
+	</select>
+	
+	<!-- by태섭, 일반 회원이 받은 입사제안 총 개수 -->
+	<select id="getOfferTotal" resultType="int">
+	SELECT count(*) FROM offer o
+	LEFT OUTER JOIN client c ON c.cl_id = o.cl_id
+	WHERE offer_state = '1' AND c.cl_id = #{param1};
+	</select>
+	<!-- SELECT count(*) FROM offer o WHERE o.offer_state = "1" -->
+	
+	<!-- by태섭, 입사제안 현황에서 받은 제안 리스트에서 삭제하기 -->
+	<update id="deleteOffer">
+		UPDATE offer SET offer_state = "0" WHERE offer_no IN
+		<foreach collection="array" item="chkArr" open="(" separator="," close=")">
+			#{chkArr}
+		</foreach>
+	</update>
+	<!-- UPDATE offer SET offer_state = "0" WHERE offer_no = #{param1}; -->
+	
+	<!-- by태섭, 개인 마이페이지 입사지원 현황 확인 -->
+	<select id="clientApplyList" resultType="com.signal.all.dto.EnterDTO">
+	SELECT 
+		jpo_title
+		,com_name
+		,apply_date
+		,inter_date
+		,inter_result
+		,jp.jpo_no
+		,jp.com_id
+	FROM interview i
+	LEFT OUTER JOIN job_posting jp ON i.jpo_no = jp.jpo_no 
+	LEFT OUTER JOIN company c ON jp.com_id = c.com_id 
+	LEFT OUTER JOIN client cl ON i.cl_id = cl.cl_id
+	WHERE cl.cl_id = #{param1} ORDER BY i.inter_no DESC
+	LIMIT #{param2}, #{param3};
+	</select>
+	
+	<!-- by태섭, 입사 지원 총 개수 -->
+	<select id="getApplyTotal" resultType="int">
+	SELECT count(*) FROM interview i 
+	LEFT OUTER JOIN client c ON c.cl_id = i.cl_id
+	WHERE i.cl_id = #{param1};
+	</select>
+	
+	<!-- by태섭, 기업 마이페이지 입사지원 현황 확인 -->
+	<select id="companyApplyList" resultType="com.signal.all.dto.EnterDTO">
+	SELECT 
+		a.apply_no
+		,a.apply_date 
+		,jp.jpo_title
+		,r.re_title
+		,i.inter_date
+		,i.inter_result
+		,i.inter_no
+		,c.cl_id 
+		,c.cl_name 
+		,c.cl_age 
+		,c.cl_gender 
+		,c.cl_photo 
+		,o.reading_state
+		,(select avg(inter_grade)/count(inter_comment) from interview i where c.cl_id = i.cl_id group by c.cl_id) as inter_grade_avg
+		,(select count(inter_comment) from interview i where c.cl_id = i.cl_id ) as gradeCnt
+		,(select avg(st_score) from self_test_result str where c.cl_id = str.cl_id group by c.cl_id) as st_score_avg
+	FROM apply a
+	LEFT OUTER JOIN interview i ON a.apply_no = i.apply_no
+	LEFT OUTER JOIN job_posting jp ON a.jpo_no = jp.jpo_no
+	LEFT OUTER JOIN resume r ON r.re_no = a.re_no
+	LEFT OUTER JOIN client c ON c.cl_id = r.cl_id
+	LEFT OUTER JOIN offer o ON o.jpo_no = jp.jpo_no
+	LEFT OUTER JOIN self_test_result str ON str.cl_id = c.cl_id 
+	WHERE jp.com_id = #{param1} GROUP BY a.apply_no ORDER BY apply_no
+	LIMIT #{param2}, #{param3};
+	</select>
+	
+	<!-- by태섭, 기업 입사 지원 총 개수 -->
+	<select id="getCompanyApplyTotal" resultType="int">
+	SELECT count(*) FROM apply a 
+	LEFT OUTER JOIN resume r ON r.re_no = a.re_no 
+	LEFT OUTER JOIN job_posting jp ON jp.jpo_no = a.jpo_no
+	WHERE jp.com_id = #{param1};
+	</select>
+	
+	<!-- by태섭, 입사지원 면접 상태 변경 -->
+	<update id="interviewSave">
+	UPDATE interview SET
+	inter_date = #{param2} 
+	,inter_result = #{param3}
+	WHERE inter_no = #{param1}
+	</update>
+	
+	<!-- by태섭, 면접 결과 변경 -->
+	<!-- <select id="interResult" resultType="String">
+	SELECT inter_result FROM interview WHERE inter_no = #{param1}
+	</select> -->
+	
+	<select id="interResultList" resultType="com.signal.all.dto.EnterDTO">
+	SELECT inter_result, inter_no, inter_date FROM interview WHERE inter_no = #{param1}
+	</select>
+	
+	<!-- 개인 입사제안 리스트에서 채용공고 상세보기 -->
+	<select id="clientOfferJobpostingDetail" parameterType="String" resultType="com.signal.all.dto.JobPostingDTO">
+		SELECT 
+			jp.jpo_title,
+            jp.jpo_type,
+            jp.jpo_region,
+            jp.jpo_field,
+            jp.jpo_start,
+            jp.jpo_deadline,
+            jp.jpo_state,
+	        jp.jpo_education,
+	        jp.jpo_salary,
+	        jp.jpo_contact,
+	        jp.jpo_name,
+	        jp.jpo_welfare,
+	        jp.jpo_photo,
+	        jp.jpo_views,
+	        co.com_id,
+            co.com_name,
+            r.re_no,
+	        p.jp_name,
+	        c.jc_name,
+	        jp.jpo_no,
+	        ci.ci_web,
+	        ci.ci_photo,
+	        count(i.inter_no) as apply_no,
+	        count(i.inter_no) AS apply,
+	        count(i.inter_comment) AS comment,
+	        ROUND(count(i.inter_comment)*100/(count(i.inter_no)),0) AS comment_a 
+	      FROM job_posting jp 
+	      LEFT OUTER JOIN company co ON co.com_id = jp.com_id 
+	      LEFT OUTER JOIN interview i ON i.com_id = jp.com_id 
+	      LEFT OUTER JOIN com_info ci ON ci.com_id = co.com_id 
+	      LEFT OUTER JOIN job_pa p ON p.jp_no = jp.jp_no 
+	      LEFT OUTER JOIN job_ch c ON c.jc_no = jp.jc_no
+	      LEFT OUTER JOIN resume r on r.re_no = i.re_no 
+      WHERE jp.jpo_no = #{param1};
+ 	</select>	
+ 	
+ 	<insert id="jobPostingApplyOne">
+ 	INSERT INTO interview(cl_id, jpo_no, re_no, com_id) 
+ 	VALUES(#{param1},#{param2},#{param3},#{param4});
+ 	</insert>
+ 	
+ 	
+ 	<insert id="jobPostingApplyTwo">
+ 	INSERT INTO interview(cl_id, jpo_no, re_no, com_id) 
+ 	VALUES(#{param1},#{param2},#{param3},#{param4});
+ 	</insert>
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+

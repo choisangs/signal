@@ -1,0 +1,327 @@
+@charset "UTF-8";
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&display=swap');
+
+* {
+    font-family:'Noto Sans KR',sans-serif;
+}
+
+#logo {
+   margin : 10px;
+}
+
+/* 좌측 메뉴바 스타일 */
+ul.sidemenu {
+        list-style-type: none;
+        width: 200px;
+        border-radius: 100px 50px;
+        padding: 0;
+        margin: 0;
+}
+
+
+nav ul li a {
+      text-decoration: none;
+    display: block;
+    color: #bfbfbf;
+    padding: 8px 15px 8px 15px;
+    /* 사이드바 메뉴 간격 조절 */
+    margin-bottom: 10px; 
+
+    font-weight: bold;
+    border-bottom: 1px solid #fff;
+}
+
+li a:hover {
+    background-color: #e8ecf4;
+    border-radius: 10px;
+    color: black;
+}
+
+/* 상단 메뉴바 스타일 */
+#header {
+   height: 220px
+}
+
+ul.nav li a {
+    text-decoration: none;
+    color: black;
+    padding: 20px 120px 8px 15px;
+    font-weight: bold;
+}
+    
+ul.nav{
+    text-decoration: none;
+    font-weight:bold;
+    padding: 8px 15px 8px 15px;
+    float:right;
+    list-style:none;
+    width: 500px;
+    position: relative;
+    left: -600px;
+    font-size: 25px;
+    top: 100px;
+}   
+     
+ul.nav li{float:left;}
+     
+/* 상단 선 스타일 */
+hr{
+    color: black;
+    width: 1250px;
+    background: #1f3864;
+}
+    
+/* 우측 상단 로그인 회원가입 관련 (밑에 코드 모두)*/
+#container {
+    width:200px;
+    height:140px;
+    text-align: center;
+    background-color: #1f3864;
+    border-radius: 20px;
+    position: relative; 
+    top: -170px;
+    left: 1170px;
+    display:table-cell;
+    vertical-align:middle;
+}
+
+#container > aside > a {
+   font-weight: bold;
+}    
+   
+#container > aside > span {
+    font-size:11px;
+    color:#c8c8c8;
+}
+
+.join,.login {
+    width: 100px;
+   height: 50px;
+    border: none;
+    background-color: #1f3864;
+   color: white;
+   padding: 10px 20px;
+   text-align: center;
+   text-decoration: none;
+   display: inline-block;
+   font-size: 15px;
+   cursor: pointer;
+   border-radius: 10px;
+   font-weight: bold;
+    position: relative;
+    top: -160px;
+    left: 1150px;
+}
+
+div aside {
+    color: white;
+}
+
+div aside a {
+    color: white;
+}
+
+li a{
+    text-align: center;
+}
+
+html {
+   overflow-y:scroll;
+}
+
+body {
+   width:1500px;
+   margin: 0 auto;
+   padding: 0;
+   font-size: 15px;
+}
+
+table {
+   width:100%;
+   border:1px solid #787878;
+   border-collapse:collapse;
+}
+
+table tr th {
+   padding:10px;
+   border:1px solid #787878;
+   background-color:#2e5192;
+   text-align: center;
+   color: white;
+}
+table tr td {
+   padding:10px;
+   border:1px solid #787878;
+}
+input[type="text"], input[type="password"], textarea {
+   padding:5px;
+   outline:none;
+   border-width:1px;
+   border-style:solid;
+}
+input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
+   background-color:#fafafa;
+}
+input[type="submit"], button[type="submit"] {
+   padding:5px 10px;
+   font-size:15px;
+   outline:none;
+   border:none;
+   color:#fff;
+   background-color:#333;
+}
+input[type="button"], button[type="button"], button {
+   padding:5px 10px;
+   font-size:15px;
+   outline:none;
+   border:none;
+   color:#fff;
+   background-color:#333;
+}
+
+select {
+   padding:5px;
+   outline:none;
+   font-size:12px;
+}
+textarea {
+   width:100%;
+   height:100px;
+   resize:none;
+   overflow-y:scroll;
+}
+
+
+
+/* 페이징 CSS */
+.pageInfo{
+    list-style : none;
+    display: inline-block;
+    margin-top: 30px;
+  }
+.pageInfo li{
+    float: left;
+    font-size: 20px;
+    margin-left: 18px;
+    padding: 7px;
+    font-weight: 500;
+}
+
+.active{
+      background-color: #cdd5ec;
+}
+
+/* 페이징2 CSS */
+ .pageInfo_wrap{
+    margin-top: 30px;
+    text-align: left;
+    position: relative;
+    left: 15%;
+ }
+  
+.pagination{
+  display: inline-block;
+ }
+.pagination a{
+   font-size:11px;
+     color:black;
+     float:left;
+     padding:8px 16px;
+     text-decoration: none;
+}
+
+/* 검색 부분 */
+.search_area{
+    display: inline-block;
+    margin-top: 30px;
+    margin-left: 260px;
+}
+.search_area input{
+    height: 30px;
+    width: 250px;
+}
+.search_area button{
+    width: 100px;
+    height: 36px;
+}
+
+.search_area select{
+   height: 35px;
+}
+
+/* 안의 내용 구성 by상인 */
+/* 테이블 부분 css */
+
+#joinsection {
+   width : 800px;
+   position: relative;
+   left : 30%;
+}
+
+#membersection {
+   width : 1400px;
+   position: relative;
+   top : -380px;
+   left : 400px;
+}
+
+#adminsection {
+   width : 1400px;
+   position: relative;
+   top : -380px;
+   left : 20%;
+}
+
+/* 비로그인시 섹션 */
+#nomembersection {
+   width : 1400px;
+   position: relative;
+   left : 25%;
+}
+
+/* 기업정보 관련 */
+
+#jp-list > #PostingWrite{
+   position: absolute;
+    top: 370px;
+    left: 360px;
+    width: 800px;
+}
+
+/* 왼쪽 버튼 */
+.button1 {
+	position: absolute;
+	top: 570px;
+	left: 350px;
+	font-size: 15px;
+}
+
+/* 오른쪽 버튼 */
+.button2 {
+	position: absolute;
+	top: 570px;
+	left: 440px;
+	font-size: 15px;
+}
+
+/* 왼쪽 버튼 */
+.button3 {
+	position: absolute;
+	top: 800px;
+	left: 350px;
+	font-size: 15px;
+}
+
+/* 오른쪽 버튼 */
+.button4 {
+	position: absolute;
+	top: 800px;
+	left: 440px;
+	font-size: 15px;
+}
+
+table tr #regbutton {
+	background-color: white;
+}
+
+

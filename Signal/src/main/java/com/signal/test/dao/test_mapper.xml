@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.signal.test.dao.TestDAO">
+	
+	<select id="selfInsert" parameterType="String" resultType="test">
+		SELECT st_que, st_hidden, st_keyword, cl_id, str.st_no, (sum(st_score)/count(st_keyword)) as cntStScore  FROM self_test_result str 
+		LEFT OUTER JOIN self_test st ON st.st_no = str.st_no 
+		WHERE cl_id=#{id}
+		group by st_keyword
+	</select>
+	
+	<select id="selfComment" parameterType="String" resultType="String">
+		SELECT st_comment FROM client
+		WHERE cl_id=#{id}
+	</select>
+	
+	<select id="selfRegGo" resultType="test">
+		SELECT st_que, st_keyword, st_no FROM self_test
+		WHERE st_hidden=1;
+	</select>
+	
+	<insert id="selfReg" parameterType="hashmap">
+		INSERT INTO self_test_result(cl_id, st_no, st_score)
+		VALUES(#{cl_id},#{st_no},#{st_score})
+	</insert>
+	
+	<update id="selfContentReg" parameterType="String">
+		UPDATE client SET
+		st_comment = #{param2}
+		WHERE cl_id=#{param1}
+	</update>	
+	
+	<update id="stUp" parameterType="hashmap">
+		UPDATE self_test_result SET		
+		st_score = #{st_score}
+		WHERE cl_id=#{cl_id} AND st_no=#{st_no}
+	</update>
+	
+	<select id="selfQueList" resultType="test">
+		SELECT st_no, st_que, st_hidden, st_keyword FROM self_test
+	</select>
+	
+	<select id="selfQueListA" resultType="test">
+		SELECT st_no, st_que, st_hidden, st_keyword FROM self_test
+		WHERE st_hidden=0
+	</select>
+	
+	<select id="selfQueListB" resultType="test">
+		SELECT st_no, st_que, st_hidden, st_keyword FROM self_test
+		WHERE st_hidden=1
+	</select>
+	
+	<update id="stHiddenUp">
+		UPDATE self_test SET
+		st_hidden = #{param2}
+		WHERE st_no=#{param1}
+	</update>
+	
+	<select id="interviewQueList" resultType="test">
+		SELECT it_no, it_que, it_hidden, it_keyword FROM interview_test
+	</select>
+	
+	<select id="interviewQueListA" resultType="test">
+		SELECT it_no, it_que, it_hidden, it_keyword FROM interview_test
+		WHERE it_hidden=0
+	</select>
+	
+	<select id="interviewQueListB" resultType="test">
+		SELECT it_no, it_que, it_hidden, it_keyword FROM interview_test
+		WHERE it_hidden=1
+	</select>
+	
+	<update id="itHiddenUp">
+		UPDATE interview_test SET
+		it_hidden = #{param2}
+		WHERE it_no=#{param1}
+	</update>
+	
+	<insert id="stReg" parameterType="hashmap">
+		INSERT INTO self_test_result (cl_id, st_no, st_score)
+		VALUES(#{cl_id},#{st_no},#{st_score})		
+	</insert>
+	
+	<insert id="selfQueReg" parameterType="hashmap">
+		INSERT INTO self_test (st_que, st_keyword)
+		VALUES(#{st_que},#{st_keyword})		
+	</insert>
+	
+	<insert id="interQueReg" parameterType="hashmap">
+		INSERT INTO interview_test (it_que, it_keyword)
+		VALUES(#{it_que},#{it_keyword})		
+	</insert>
+	
+	<select id="selfTestDetail1" parameterType="String" resultType="String" >
+		select format(sum(st_score)/count(st_score),1) as scoreCnt from self_test_result str
+		left outer join self_test st ON str.st_no =st.st_no 
+		left outer join client c on str.cl_id = c.cl_id 
+		where str.cl_id=#{cl_id} and st_keyword="책임감";
+	</select>
+	
+	<select id="selfTestDetail2" parameterType="String" resultType="String" >
+		select format(sum(st_score)/count(st_score),1) as scoreCnt from self_test_result str
+		left outer join self_test st ON str.st_no =st.st_no 
+		left outer join client c on str.cl_id = c.cl_id 
+		where str.cl_id=#{cl_id} and st_keyword="침착함";
+	</select>
+	
+	<select id="selfTestDetail3" parameterType="String" resultType="String" >
+		select format(sum(st_score)/count(st_score),1) as scoreCnt from self_test_result str
+		left outer join self_test st ON str.st_no =st.st_no 
+		left outer join client c on str.cl_id = c.cl_id 
+		where str.cl_id=#{cl_id} and st_keyword="적극성";
+	</select>
+	
+	<select id="selfTestDetail4" parameterType="String" resultType="String" >
+		select format(sum(st_score)/count(st_score),1) as scoreCnt from self_test_result str
+		left outer join self_test st ON str.st_no =st.st_no 
+		left outer join client c on str.cl_id = c.cl_id 
+		where str.cl_id=#{cl_id} and st_keyword="자신감";
+	</select>
+	
+	<select id="selfTestDetail5" parameterType="String" resultType="String" >
+		select format(sum(st_score)/count(st_score),1) as scoreCnt from self_test_result str
+		left outer join self_test st ON str.st_no =st.st_no 
+		left outer join client c on str.cl_id = c.cl_id 
+		where str.cl_id=#{cl_id} and st_keyword="성실함";
+	</select>
+	
+	<select id="selfTestDetail6" parameterType="String" resultType="String" >
+		select format(sum(st_score)/count(st_score),2) as avr from self_test_result str 
+		where str.cl_id=#{cl_id};
+	</select>
+	
+	<select id="interviewTestDetail1" parameterType="String" resultType="test" >
+		select inter_score  from interview i
+		right outer join interview_test_result itr on i.inter_no=itr.inter_no 
+		left outer join interview_test it on it.it_no = itr.it_no
+		left outer join client c on i.cl_id = c.cl_id
+		where i.cl_id=#{cl_id} and it_keyword="책임감";
+	</select>
+	
+	<select id="interviewTestDetail2" parameterType="String" resultType="test" >
+		select inter_score  from interview i
+		right outer join interview_test_result itr on i.inter_no=itr.inter_no 
+		left outer join interview_test it on it.it_no = itr.it_no
+		left outer join client c on i.cl_id = c.cl_id
+		where i.cl_id=#{cl_id} and it_keyword="침착함";
+	</select>
+	
+	<select id="interviewTestDetail3" parameterType="String" resultType="test" >
+		select inter_score  from interview i
+		right outer join interview_test_result itr on i.inter_no=itr.inter_no 
+		left outer join interview_test it on it.it_no = itr.it_no
+		left outer join client c on i.cl_id = c.cl_id
+		where i.cl_id=#{cl_id} and it_keyword="적극성";
+	</select>
+	
+	<select id="interviewTestDetail4" parameterType="String" resultType="test" >
+		select inter_score  from interview i
+		right outer join interview_test_result itr on i.inter_no=itr.inter_no 
+		left outer join interview_test it on it.it_no = itr.it_no
+		left outer join client c on i.cl_id = c.cl_id
+		where i.cl_id=#{cl_id} and it_keyword="자신감";
+	</select>
+	
+	<select id="interviewTestDetail5" parameterType="String" resultType="test" >
+		select inter_score  from interview i
+		right outer join interview_test_result itr on i.inter_no=itr.inter_no 
+		left outer join interview_test it on it.it_no = itr.it_no
+		left outer join client c on i.cl_id = c.cl_id
+		where i.cl_id=#{cl_id} and it_keyword="성실함";
+	</select>
+	
+	<select id="interviewTestComment" parameterType="String" resultType="test">
+		SELECT inter_comment FROM interview
+		WHERE cl_id=#{cl_id}
+	</select>
+	
+	<select id="interviewTestDetail6" parameterType="String" resultType="String" >
+		select format(sum(inter_score)/count(inter_score),2) as avr from interview_test_result itr
+		right outer join interview i on i.inter_no=itr.inter_no 
+		left outer join interview_test it on it.it_no = itr.it_no
+		left outer join client c on i.cl_id = c.cl_id
+		where i.cl_id=#{cl_id};
+	</select>
+	
+	<select id="interviewTestDetail7" parameterType="String" resultType="String" >
+		select (count(inter_no)) as cnt from interview i	
+		where i.cl_id=#{cl_id} and inter_result != "면접예정" and inter_result != "";
+	</select>
+	
+	<select id="selfUpGo" parameterType="String" resultType="test">
+		SELECT st_que, st_keyword, str.st_no, st_score FROM self_test st 
+		left outer join self_test_result str on str.st_no  = st.st_no 
+		WHERE cl_id=#{cl_id}
+	</select>
+	
+	
+	
+	
+</mapper>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.signal.job.dao.JobDAO">
+	
+	<insert id="jpReg" parameterType="hashmap">
+		INSERT INTO job_pa (jp_name)
+		VALUES(#{jp_name})		
+	</insert>
+	
+	<insert id="jcReg" parameterType="hashmap">
+		INSERT INTO job_ch (jp_no, jc_name)
+		VALUES(#{jp_no},#{jc_name})		
+	</insert>
+	
+	<update id="jpHiddenUp">
+		UPDATE job_pa SET
+		jp_hidden = #{param2}
+		WHERE jp_no=#{param1}
+	</update>
+	
+	<update id="jpJcHiddenUp">
+		UPDATE job_ch SET
+		jc_hidden = #{param2}
+		WHERE jp_no=#{param1}
+	</update>
+	
+	<update id="jcHiddenUp">
+		UPDATE job_ch SET
+		jc_hidden = #{param2}
+		WHERE jc_no=#{param1}
+	</update>
+	
+	<select id="hiddenGet" resultType="int">
+		SELECT jp_hidden FROM job_pa
+		WHERE jp_no=#{param1}
+	</select>
+	
+	<select id="jpAdminList" resultType="resume">
+		SELECT jp_no, jp_name, jp_hidden FROM job_pa		
+	</select>
+	
+	<select id="jcAdminList" resultType="resume" parameterType="String">
+		SELECT jp_no, jc_no, jc_name, jc_hidden FROM job_ch
+		WHERE jp_no=#{jp_no}
+	</select>
+	
+</mapper>

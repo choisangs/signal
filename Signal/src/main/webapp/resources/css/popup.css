@@ -1,0 +1,44 @@
+@charset "UTF-8";
+
+* {
+    font-family:'Noto Sans KR',sans-serif;
+}
+
+/* 안의 내용 구성 by상인 */
+/* 테이블 부분 css */
+
+h1 {
+	font-size: 40px;
+}
+
+#membersection {
+	width : 1400px;
+	position: relative;
+	top : -380px;
+	left : 25%;
+}
+
+table {
+	text-align: center;
+}
+
+input[type="submit"], button[type="submit"] {
+   padding:5px 10px;
+   font-size:15px;
+   outline:none;
+   border:none;
+   color:#fff;
+   background-color:#333;
+}
+input[type="button"], button[type="button"] {
+   padding:5px 10px;
+   font-size:15px;
+   outline:none;
+   border:none;
+   color:#fff;
+   background-color:#333;
+}
+
+
+
+

@@ -1,0 +1,588 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.signal.member.dao.MemberDAO">
+	<select id="overlayClientId" parameterType="String" resultType="String">
+	SELECT cl_id
+	FROM client WHERE cl_id =#{chkclId}
+	</select>
+	
+	<select id="overlayEmail" parameterType="String" resultType="String">
+	SELECT cl_email 
+	FROM client WHERE cl_email=#{chkEmail}
+	</select>
+	
+	<insert id="joinClient" parameterType="hashmap">
+	INSERT INTO client
+	(cl_id
+	,cl_pw
+	,cl_name
+	,cl_birth
+	,cl_age
+	,cl_gender
+	,cl_address
+	,cl_call
+	,cl_email
+	,cl_state
+	)
+	VALUES (#{cl_id},PASSWORD(#{cl_pw}),#{cl_name},#{cl_birth},#{cl_age},#{cl_gender},#{cl_address},#{cl_call},#{cl_email},#{cl_state})
+	</insert>
+	
+	<!-- 개인회원가입후 파일 업데이트 시켜주기 -->
+	<update id="fileWrite">
+	UPDATE client
+	SET cl_photo = #{param1} 
+	WHERE cl_id = #{param2}
+	</update>
+	
+	<!-- 개인회원 로그인 String 으로 받기 -->
+	<select id="clientLogin" resultType="String">
+	SELECT cl_id FROM client WHERE cl_id = #{param1} AND cl_pw =PASSWORD(#{param2})
+	</select>
+	
+	<select id="clientdto" parameterType="String" resultType="com.signal.all.dto.MemberDTO">
+	SELECT cl_id
+	,cl_pw
+	,cl_name
+	,cl_birth
+	,cl_age
+	,cl_gender
+	,cl_address
+	,cl_call
+	,cl_email
+	,cl_photo
+	,cl_state
+	FROM client WHERE cl_id = #{param1}
+   </select>
+   
+   <!-- 기업회원 로그인 String 으로 받기 -->
+	<select id="companyLogin" resultType="String">
+	SELECT com_id FROM company WHERE com_id = #{param1} AND com_pw = PASSWORD(#{param2})
+	</select>
+	
+	<select id="companydto" parameterType="String" resultType="com.signal.all.dto.MemberDTO">
+	SELECT com_id
+	,com_pw
+	,com_business_no
+	,com_name
+	,com_address
+	,com_call
+	,com_email
+	,com_photo
+	,com_state
+	FROM company WHERE com_id = #{param1}
+   </select>
+   
+   
+   <!-- 관리자 로그인 String 으로 받기 -->
+	<select id="adminLogin" resultType="String">
+	SELECT ad_id FROM admin WHERE ad_id = #{param1} AND ad_pw = #{param2}
+	</select>
+	
+	<select id="admindto" parameterType="String" resultType="com.signal.all.dto.MemberDTO">
+	SELECT ad_id
+	,ad_pw
+	,ad_name
+	,ad_call
+	,ad_email
+	,ad_state
+	,ad_date
+	,ad_comment
+	FROM admin WHERE ad_id = #{param1}
+   </select>
+	
+	<!-- 
+	<select id="clientMember" resultType="int">
+	SELECT COUNT(cl_id) FROM client WHERE cl_id= #{param1} AND cl_pw = PASSWORD(#{param2}) AND cl_state =#{param3}
+	</select>
+	
+	<select id="companyMember" resultType="int">
+	SELECT COUNT(com_id) FROM company WHERE com_id= #{param1} AND com_pw = PASSWORD(#{param2}) AND com_state =#{param3}
+	</select>
+	 -->
+	
+	<select id="overlayCompanyId" parameterType="String" resultType="String">
+	SELECT com_id
+	FROM company WHERE com_id =#{chkComId}
+	</select>
+	
+	<select id="overlayComEmail" parameterType="String" resultType="String">
+	SELECT com_email 
+	FROM company WHERE com_email=#{chkComEmail}
+	</select>
+	
+	<select id="overlayNumber" parameterType="String" resultType="String">
+	SELECT com_business_no 
+	FROM company WHERE com_business_no=#{chkNumber}
+	</select>
+	
+	
+	<insert id="joinCompany" parameterType="hashmap">
+	INSERT INTO company
+	(com_id
+	,com_pw
+	,com_business_no
+	,com_name
+	,com_address
+	,com_call
+	,com_email
+	,com_state
+	)
+	VALUES(#{com_id},PASSWORD(#{com_pw}),#{com_business_no},#{com_name},#{com_address},#{com_call},#{com_email},#{com_state})
+	</insert>
+	
+	<!-- 기업회원가입후 파일 업데이트 시켜주기 -->
+	<update id="fileWrite2">
+	UPDATE company
+	SET com_photo = #{param1} 
+	WHERE com_id = #{param2}
+	</update>
+	
+	
+	<select id="findClientId" resultType="String">
+	SELECT cl_id
+	FROM client
+	WHERE cl_name=#{param1} AND cl_email=#{param2}
+	</select>
+	
+	<select id="findCompanyId" resultType="String">
+	SELECT com_id
+	FROM company
+	WHERE com_email=#{param1} AND com_business_no=#{param2}
+	</select>
+	
+	<select id="findClientPw" resultType="int">
+	SELECT COUNT(cl_id)
+	FROM client
+	WHERE cl_id=#{param1} AND cl_name=#{param2} AND cl_email=#{param3}
+	</select>
+	
+	<update id="clientPwChange">
+	UPDATE client SET cl_pw = PASSWORD(#{param2}) WHERE cl_id = #{param1}
+	</update>
+	
+	<select id="findCompanyPw" resultType="int">
+	SELECT COUNT(com_id)
+	FROM company
+	WHERE com_id=#{param1} AND com_email=#{param2} AND com_business_no=#{param3}
+	</select>
+	
+	<update id="companyPwChange">
+	UPDATE company SET com_pw = PASSWORD(#{param2}) WHERE com_id = #{param1}
+	</update>
+	
+	<select id="clientInfoManagement" parameterType="String" resultType="com.signal.all.dto.MemberDTO">
+	SELECT
+	cl_id
+	,cl_name
+	,cl_birth
+	,cl_age
+	,cl_gender
+	,cl_address
+	,cl_call
+	,cl_email
+	,cl_photo
+	FROM client
+	WHERE cl_id = #{cl_id}
+	</select>
+	
+	<select id="passwordConfirm" resultType="String">
+	SELECT DISTINCT cl_pw FROM client WHERE cl_pw = PASSWORD(#{param2})
+	</select>
+	
+	<update id="clientInfoUpdate" parameterType="hashmap">
+	UPDATE client SET
+		<if test="!pw.equals('')">
+			cl_pw = PASSWORD(#{pw}),
+		</if>
+		cl_name = #{cl_name}
+		,cl_age = #{cl_age}
+		,cl_gender = #{gender}
+		,cl_address = #{cl_address}
+		,cl_call = #{cl_call}
+		,cl_email = #{cl_email}
+		<if test="file==''">
+		,cl_photo = #{orifile}
+		</if>
+		<if test="!file==''">
+		,cl_photo = #{file}
+		</if>
+	WHERE cl_id = #{cl_id} AND cl_pw = PASSWORD(#{cl_pw}) 
+	</update>
+		
+	<select id="companyInfoManagement" parameterType="String" resultType="com.signal.all.dto.MemberDTO">
+	SELECT
+	com_id
+	,com_business_no
+	,com_name
+	,com_address
+	,com_call
+	,com_email
+	,com_photo
+	FROM company
+	WHERE com_id = #{com_id}
+	</select>
+	
+	<select id="passwordConfirm2" resultType="String">
+	SELECT DISTINCT com_pw FROM company WHERE com_pw = PASSWORD(#{param2})
+	</select>
+	
+	<update id="companyMemberInfoUpdate" parameterType="hashmap">
+	UPDATE company SET
+		<if test="!pw.equals('')">
+			com_pw = PASSWORD(#{pw}),
+		</if>
+		com_name = #{com_name}
+		,com_address = #{com_address}
+		,com_call = #{com_call}
+		,com_email = #{com_email}
+		<if test="file==''">
+		,com_photo = #{orifile}
+		</if>
+		<if test="!file==''">
+		,com_photo = #{file}
+		</if>
+	WHERE com_id = #{com_id} AND com_pw = PASSWORD(#{com_pw}) 
+	</update>
+	
+	<update id="clientDelete">
+	UPDATE client SET cl_state ="탈퇴회원" where cl_id = #{cl_id}
+	</update>
+	
+	<insert id="clientManagement" parameterType="hashmap">
+	INSERT INTO cl_admin(
+	cl_id
+	,cl_break_re)
+	VALUES (#{cl_id},#{mg_content})
+	</insert>
+	
+	
+	<update id="companyDelete">
+	UPDATE company SET com_state ="탈퇴회원" where com_id = #{com_id}
+	</update>
+	
+	<insert id="companyManagement" parameterType="hashmap">
+	INSERT INTO com_admin(
+	com_id
+	,com_break_re)
+	VALUES (#{com_id},#{mg_content})
+	</insert>
+	
+	
+	<!-- 관리자 정보 리스트 -->
+	<select id="adminInfoManagement" resultType="com.signal.all.dto.MemberDTO" >
+	SELECT
+	ad_id
+	,ad_pw
+	,ad_name
+	,ad_call
+	,ad_email
+	,ad_state
+	,ad_date
+	,ad_comment
+	FROM admin
+	</select>
+	
+	<!-- 관리자 아이디 중복체크 -->
+	<select id="overlayAdminId" parameterType="String" resultType="String">
+	SELECT ad_id
+	FROM admin WHERE ad_id =#{chkadminId}
+	</select>
+	
+	<!-- 관리자 이메일 중복체크 -->
+	<select id="overlayAdminEmail" parameterType="String" resultType="String">
+	SELECT ad_email 
+	FROM admin WHERE ad_email=#{chkAdminEmail}
+	</select>
+	
+	<!-- 관리자 계정등록(회원가입) -->
+	<insert id="joinAdmin" parameterType="hashmap">
+	INSERT INTO admin
+	(ad_id
+	,ad_pw
+	,ad_name
+	,ad_call
+	,ad_email
+	,ad_state
+	)
+	VALUES (#{ad_id},#{ad_pw},#{ad_name},#{ad_call},#{ad_email},#{ad_state})
+	</insert>
+	
+	
+
+	<select id="adminStateChangePopup" resultType="com.signal.all.dto.MemberDTO" >
+	SELECT
+	ad_id
+	,ad_pw
+	,ad_name
+	,ad_call
+	,ad_email
+	,ad_state
+	,ad_date
+	,ad_comment
+	FROM admin
+	WHERE ad_id = #{ad_id}
+	</select>
+	
+	<update id="adminStateUpdate" parameterType="hashmap">
+	UPDATE admin SET
+	<if test="ad_state.equals('재직')">
+	ad_state = "관리자"
+	</if>
+	<if test="ad_state.equals('퇴사')">
+	ad_state = "탈퇴회원"
+	</if>
+	,ad_comment = #{ad_comment}
+	,ad_date = curdate()
+	WHERE ad_id = #{ad_id}	
+	</update>
+	
+	
+	<!-- 개인 회원 전체 리스트 10개씩 보여주기 -->
+	<select id="clientManagementList" resultType="com.signal.all.dto.MemberDTO">
+	SELECT
+	cl_id
+	,cl_name
+	,cl_call
+	,cl_address
+	,cl_birth
+	,cl_email
+	,cl_gender
+	,cl_join_date
+	,cl_state
+	,cl_photo
+	,cl_age
+	FROM client LIMIT #{skip},10
+	</select>
+	
+	<!-- 개인회원 전체 숫자 세기 -->
+	<select id="clientListTotal" resultType="int">
+	SELECT count(cl_id)
+	FROM client
+	</select>
+	
+	<!-- 개인회원 검색하기 -->
+	<select id="clientListSearch" resultType="com.signal.all.dto.MemberDTO">
+	SELECT
+	cl_id
+	,cl_name
+	,cl_address
+	,cl_gender
+	,cl_email
+	,cl_call
+	,cl_birth
+	,cl_state
+	FROM client
+	WHERE 
+		<if test="param1.equals('') and !param2.equals('')">
+			cl_id LIKE CONCAT ('%',#{param2},'%')
+			OR cl_name LIKE CONCAT ('%',#{param2},'%')
+		</if>
+		<if test="param1.equals('개인회원') and param2.equals('')">
+			cl_state = "개인회원"
+		</if>
+		<if test="param1.equals('개인회원') and !param2.equals('')">
+			cl_id LIKE CONCAT ('%',#{param2},'%')
+			OR cl_name LIKE CONCAT ('%',#{param2},'%')
+		</if>
+		<if test="param1.equals('탈퇴회원') and !param2.equals('')">
+			(cl_id LIKE CONCAT ('%',#{param2},'%')
+			OR cl_name LIKE CONCAT ('%',#{param2},'%'))
+			AND cl_state = "탈퇴회원"
+		</if>
+		<if test="param1.equals('탈퇴회원') and param2.equals('')">
+			cl_state = "탈퇴회원"
+		</if>
+		<if test="param1.equals('') and param2.equals('')">
+			cl_state = "개인회원" OR cl_state = "탈퇴회원"
+		</if>
+	LIMIT #{param3},10
+	</select>
+	
+	<!-- 개인회원 검색결과 수 -->
+	<select id="clientSearchTotal" resultType="int">
+	SELECT count(cl_id)
+	FROM client
+	WHERE
+		<if test="param1.equals('') and !param2.equals('')">
+			cl_id LIKE CONCAT ('%',#{param2},'%')
+			OR cl_name LIKE CONCAT ('%',#{param2},'%')
+		</if>
+		<if test="param1.equals('개인회원') and param2.equals('')">
+			cl_state = "개인회원"
+		</if>
+		<if test="param1.equals('개인회원') and !param2.equals('')">
+			cl_id LIKE CONCAT ('%',#{param2},'%')
+			OR cl_name LIKE CONCAT ('%',#{param2},'%')
+		</if>
+		<if test="param1.equals('탈퇴회원') and !param2.equals('')">
+			(cl_id LIKE CONCAT ('%',#{param2},'%')
+			OR cl_name LIKE CONCAT ('%',#{param2},'%'))
+			AND cl_state = "탈퇴회원"
+		</if>
+		<if test="param1.equals('탈퇴회원') and param2.equals('')">
+			cl_state = "탈퇴회원"
+		</if>
+		<if test="param1.equals('') and param2.equals('')">
+			cl_state = "개인회원" OR cl_state = "탈퇴회원"
+		</if>
+	</select>
+	
+	<!-- 개인회원 상태 변경 팝업창에 리스트 가져오기 -->
+	<select id="clientStateChangePopup" resultType="com.signal.all.dto.MemberDTO" >
+	SELECT
+	c.cl_id
+	,cl_name
+	,cl_state
+	,c.cl_admin_re
+	,max(cl_break_date)
+	,cl_break_re
+	,cl_update_date
+	FROM client c
+	LEFT OUTER JOIN cl_admin ca ON c.cl_id= ca.cl_id
+	WHERE c.cl_id = #{cl_id}
+	</select>
+	
+	<!-- 개인회원 상태 변경 및 변경사유 작성하기 -->
+	<update id="clientStateUpdate" parameterType="hashmap">
+	UPDATE client SET
+	<if test="cl_state.equals('개인회원')">
+	cl_state = "개인회원"
+	</if>
+	<if test="cl_state.equals('탈퇴회원')">
+	cl_state = "탈퇴회원"
+	</if>
+	,cl_admin_re = #{cl_admin_re}
+	,cl_update_date =curdate()
+	WHERE cl_id = #{cl_id}	
+	</update>
+	
+	<!-- 
+	개인회원 상태 수정 사유 변경하기 
+	<insert id="clientCommentUpdate" parameterType="hashmap">
+	INSERT INTO cl_admin(
+	cl_id
+	,cl_admin_re)
+	VALUES (#{cl_id},#{cl_admin_re})
+	</insert>
+	 -->
+	 
+	 
+ 	<!-- 기업 회원 전체 리스트 10개씩 보여주기 -->
+	<select id="companyManagementList" resultType="com.signal.all.dto.MemberDTO">
+	SELECT
+	com_id
+	,com_name
+	,com_business_no
+	,com_address
+	,com_call
+	,com_email
+	,com_state
+	FROM company LIMIT #{skip},10
+	</select>
+	
+	<!-- 기업회원 전체 숫자 세기 -->
+	<select id="companyListTotal" resultType="int">
+	SELECT count(com_id)
+	FROM company
+	</select>
+	
+	<!-- 기업회원 검색하기 -->
+	<select id="companyListSearch" resultType="com.signal.all.dto.MemberDTO">
+	SELECT
+	com_id
+	,com_name
+	,com_business_no
+	,com_address
+	,com_call
+	,com_email
+	,com_state
+	FROM company
+	WHERE 
+		<if test="param1.equals('') and !param2.equals('')">
+			com_id LIKE CONCAT ('%',#{param2},'%')
+			OR com_name LIKE CONCAT ('%',#{param2},'%')
+		</if>
+		<if test="param1.equals('기업회원') and param2.equals('')">
+			com_state = "기업회원"
+		</if>
+		<if test="param1.equals('기업회원') and !param2.equals('')">
+			com_id LIKE CONCAT ('%',#{param2},'%')
+			OR com_name LIKE CONCAT ('%',#{param2},'%')
+		</if>
+		<if test="param1.equals('탈퇴회원') and !param2.equals('')">
+			(com_id LIKE CONCAT ('%',#{param2},'%')
+			OR com_name LIKE CONCAT ('%',#{param2},'%'))
+			AND com_state = "탈퇴회원"
+		</if>
+		<if test="param1.equals('탈퇴회원') and param2.equals('')">
+			com_state = "탈퇴회원"
+		</if>
+		<if test="param1.equals('') and param2.equals('')">
+			com_state = "기업회원" OR com_state = "탈퇴회원"
+		</if>
+	LIMIT #{param3},10
+	</select>
+	
+	<!-- 기업회원 검색결과 수 -->
+	<select id="companySearchTotal" resultType="int">
+	SELECT count(com_id)
+	FROM company
+	WHERE
+		<if test="param1.equals('') and !param2.equals('')">
+			com_id LIKE CONCAT ('%',#{param2},'%')
+			OR com_name LIKE CONCAT ('%',#{param2},'%')
+		</if>
+		<if test="param1.equals('기업회원') and param2.equals('')">
+			com_state = "기업회원"
+		</if>
+		<if test="param1.equals('기업회원') and !param2.equals('')">
+			com_id LIKE CONCAT ('%',#{param2},'%')
+			OR com_name LIKE CONCAT ('%',#{param2},'%')
+		</if>
+		<if test="param1.equals('탈퇴회원') and !param2.equals('')">
+			(com_id LIKE CONCAT ('%',#{param2},'%')
+			OR com_name LIKE CONCAT ('%',#{param2},'%'))
+			AND com_state = "탈퇴회원"
+		</if>
+		<if test="param1.equals('탈퇴회원') and param2.equals('')">
+			com_state = "탈퇴회원"
+		</if>
+		<if test="param1.equals('') and param2.equals('')">
+			com_state = "기업회원" OR com_state = "탈퇴회원"
+		</if>
+	</select>
+	
+	<!-- 기업회원 상태 변경 팝업창에 리스트 가져오기 -->
+	<select id="companyStateChangePopup" resultType="com.signal.all.dto.MemberDTO" >
+	SELECT
+	co.com_id
+	,com_name
+	,com_state
+	,co.com_admin_re
+	,com_break_date
+	,com_break_re
+	,com_update_date
+	FROM company co
+	LEFT OUTER JOIN com_admin ca ON co.com_id= ca.com_id
+	WHERE co.com_id = #{com_id}
+	</select>
+	
+	<!-- 기업회원 상태 변경 및 변경사유 작성하기 -->
+	<update id="companyStateChange" parameterType="hashmap">
+	UPDATE company SET
+	<if test="com_state.equals('기업회원')">
+	com_state = "기업회원"
+	</if>
+	<if test="com_state.equals('탈퇴회원')">
+	com_state = "탈퇴회원"
+	</if>
+	,com_admin_re = #{com_admin_re}
+	,com_update_date =curdate()
+	WHERE com_id = #{com_id}
+	</update>
+	
+	
+	
+	
+</mapper>

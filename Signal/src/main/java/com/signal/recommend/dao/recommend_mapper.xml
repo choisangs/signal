@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.signal.recommend.dao.RecommendDAO">
+	
+	<select id="overlay" parameterType="String" resultType="String">
+		SELECT cl_id FROM client
+		where cl_id=#{reco_cl_id}
+	</select>
+	
+	<insert id="recommendReg" parameterType="hashmap">
+		INSERT INTO recommend (reco_cl_id, cl_id, reco_content)
+		VALUES (#{reco_cl_id},#{cl_id},#{reco_content}) 
+	</insert>
+	
+	<select id="recommendU" parameterType="String" resultType="String">
+		SELECT cl_id FROM recommend
+		WHERE reco_no=#{reco_no}
+	</select>
+	
+	<select id="recommendUb" parameterType="String" resultType="String">
+		SELECT reco_state FROM recommend
+		WHERE reco_no=#{reco_no}
+	</select>
+	
+	<update id="recommendUReg" parameterType="hashmap">
+		UPDATE recommend SET
+		reco_req_memo=#{reco_req_memo},
+		reco_relation=#{reco_relation},
+		reco_date=#{reco_date},
+		reco_state='응답'
+		WHERE reco_no=#{reco_no}
+	</update>
+	
+</mapper>

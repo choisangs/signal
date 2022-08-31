@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.signal.objection.dao.ObjectionDAO">
+
+	
+		<select id="clientObjectionList" resultType="com.signal.all.dto.ObjectionDTO">
+		SELECT 
+			jpo_title,com_name,inter_date,inter_result,inter_grade,obj_state,obj_content,obj_date,o.inter_no,o.obj_no,i.cl_id,
+				(select format(avg(inter_score),1)
+				from interview_test_result itr 
+				where inter_no =i.inter_no)as inter_avg
+		FROM objection o 
+			left outer join interview i on o.inter_no = i.inter_no 
+			left outer join job_posting jp on i.jpo_no = jp.jpo_no 
+			left outer join company c on jp.com_id = c.com_id 
+		WHERE cl_id =#{cl_id}
+		ORDER BY 
+			obj_no  desc 
+			limit 10 OFFSET #{skip};
+		</select>
+		<!-- where i.cl_id =#{cl_id} 추가 -->
+		
+		<select id="clientObjectionListTotal" resultType="int">
+		SELECT 
+			count(obj_no)
+		FROM objection o 
+			left outer join interview i on o.inter_no = i.inter_no 
+			left outer join job_posting jp on i.jpo_no = jp.jpo_no 
+			left outer join company c on jp.com_id = c.com_id
+		WHERE cl_id =#{cl_id}
+		</select>
+		<!-- where i.cl_id =#{cl_id} 추가 -->
+	
+	<select id="comObjectionList" resultType="com.signal.all.dto.ObjectionDTO">
+			SELECT 
+				cl.cl_photo ,cl.cl_name,cl.cl_age,cl.cl_gender,re.re_title,com.com_name,i.inter_date,i.inter_result,i.inter_grade ,ob.obj_cl_content,ob.obj_state,ob.obj_date,ob.obj_no,i.inter_no,
+				(select format(avg(inter_score),1)
+				from interview_test_result itr 
+				where inter_no =i.inter_no)as inter_avg 
+			FROM objection ob
+				left outer join interview i on ob.inter_no = i.inter_no 
+				left outer join job_posting jp on i.jpo_no = jp.jpo_no 
+				left outer join company com on jp.com_id = com.com_id 
+				left outer join resume re on i.re_no = re.re_no 
+				left outer join client cl on re.cl_id = cl.cl_id
+			where i.com_id =#{com_id}
+				ORDER BY 
+				obj_no  desc 
+				limit 10 OFFSET #{skip};
+		</select>
+		
+		<select id="comObjectionTotal" resultType="int">
+			SELECT 
+				count(*) 
+			FROM objection ob
+				left outer join interview i on ob.inter_no = i.inter_no 
+				left outer join job_posting jp on i.jpo_no = jp.jpo_no 
+				left outer join company com on jp.com_id = com.com_id 
+				left outer join resume re on i.re_no = re.re_no 
+				left outer join client cl on re.cl_id = cl.cl_id
+			where i.com_id =#{com_id};
+			</select>
+
+		
+		
+		
+		<select id="comObjectionUpdate" resultType="com.signal.all.dto.ObjectionDTO" parameterType="String">
+			SELECT 
+				obj_no,obj_state
+			FROM objection o 
+			WHERE obj_no =#{obj_no};
+		</select>
+		
+		<update id="comObjectionUpdateDo" parameterType="hashmap">
+		UPDATE objection 
+		SET obj_state=#{obj_state},obj_content=#{obj_content},obj_date =curdate()
+		WHERE obj_no =#{obj_no}
+		</update>
+			
+			<!-- 이의제기관리(관리자)리스트 페이징 -->
+			<select id="adminObjectionList" resultType="com.signal.all.dto.ObjectionDTO">
+			SELECT 
+				distinct cl.cl_id ,cl.cl_name,ob.obj_state,com.com_name,com.com_id,i.inter_no,i.inter_blind  
+			FROM objection ob
+				left outer join interview i on ob.inter_no = i.inter_no 
+				left outer join job_posting jp on i.jpo_no = jp.jpo_no 
+				left outer join company com on jp.com_id = com.com_id 
+				left outer join resume re on i.re_no = re.re_no 
+				left outer join client cl on re.cl_id = cl.cl_id
+				where i.inter_blind ='1'
+				ORDER BY ob.obj_no DESC limit #{skip},10
+		</select>
+		<!-- 관리자는 모든걸 확인가능하기에 session 추가X -->
+		<!-- 이의제기관리(관리자)리스트 페이징 토탈 -->
+		<select id="adminObjectionTotal" resultType="int">
+			SELECT 
+				count(ob.obj_no)
+			FROM objection ob
+				left outer join interview i on ob.inter_no = i.inter_no 
+				left outer join job_posting jp on i.jpo_no = jp.jpo_no 
+				left outer join company com on jp.com_id = com.com_id 
+				left outer join resume re on i.re_no = re.re_no 
+				left outer join client cl on re.cl_id = cl.cl_id
+				where i.inter_blind ='1'
+		</select>
+		
+		
+			<!-- 이의제기관리(관리자)검색 페이징 -->
+			<select id="adminObjectionSearch"  resultType="com.signal.all.dto.ObjectionDTO">
+			SELECT 
+						distinct cl.cl_id ,cl.cl_name,ob.obj_state,com.com_name,com.com_id,i.inter_no,i.inter_blind  
+			FROM objection ob
+				left outer join interview i on ob.inter_no = i.inter_no 
+				left outer join job_posting jp on i.jpo_no = jp.jpo_no 
+				left outer join company com on jp.com_id = com.com_id 
+				left outer join resume re on i.re_no = re.re_no 
+				left outer join client cl on re.cl_id = cl.cl_id 
+				where 1 and i.inter_blind ='1'
+			<if  test = "param1.equals('') and  !param2.equals('')"> 
+				AND (cl.cl_id LIKE CONCAT ('%',#{param2},'%') 
+				OR com.com_id LIKE CONCAT ('%',#{param2},'%')
+				OR com.com_name LIKE CONCAT ('%',#{param2},'%'))
+			</if>
+			<if  test = "!param2.equals('')">
+				<if test = "param1.equals('개인회원')">
+			      	AND cl.cl_id LIKE CONCAT ('%',#{param2},'%')
+			  	 </if>
+			  	 <if test ="param1.equals('기업회원')">
+			    	 AND com.com_id LIKE CONCAT ('%',#{param2},'%')
+			  	 </if>
+			  	  <if test ="param1.equals('기업명')">
+			    	 AND com.com_name LIKE CONCAT ('%',#{param2},'%')
+			  	 </if>
+			</if>
+			ORDER BY ob.obj_no DESC limit #{param3},10
+		</select>
+		<select id="adminObjectionTotal2" resultType="int"  >
+			SELECT 
+						count(ob.obj_no)
+			FROM objection ob
+				left outer join interview i on ob.inter_no = i.inter_no  
+				left outer join job_posting jp on i.jpo_no = jp.jpo_no 
+				left outer join company com on jp.com_id = com.com_id 
+				left outer join resume re on i.re_no = re.re_no 
+				left outer join client cl on re.cl_id = cl.cl_id 
+				where 1 and i.inter_blind ='1'
+			<if  test = "param1.equals('') and  !param2.equals('')"> 
+				AND (cl.cl_id LIKE CONCAT ('%',#{param2},'%') 
+				OR com.com_id LIKE CONCAT ('%',#{param2},'%')
+				OR com.com_name LIKE CONCAT ('%',#{param2},'%'))
+			</if>
+			<if  test = "!param2.equals('')">
+				<if test = "param1.equals('개인회원')">
+			      	AND cl.cl_id LIKE CONCAT ('%',#{param2},'%')
+			  	 </if>
+			  	 <if test ="param1.equals('기업회원')">
+			    	 AND com.com_id LIKE CONCAT ('%',#{param2},'%')
+			  	 </if>
+			  	 <if test ="param1.equals('기업명')">
+			    	 AND com.com_name LIKE CONCAT ('%',#{param2},'%')
+			  	 </if>
+			</if>
+		</select>
+		
+		<!-- 블라인드관리(관리자)리스트 페이징 -->
+		<select id="adminBlindList" resultType="com.signal.all.dto.ObjectionDTO">
+		SELECT 
+				distinct cl.cl_id ,cl.cl_name,ob.obj_state,com.com_name,com.com_id,i.inter_no,i.inter_blind  
+			FROM objection ob
+				left outer join interview i on ob.inter_no = i.inter_no 
+				left outer join job_posting jp on i.jpo_no = jp.jpo_no 
+				left outer join company com on jp.com_id = com.com_id 
+				left outer join resume re on i.re_no = re.re_no 
+				left outer join client cl on re.cl_id = cl.cl_id
+				where i.inter_blind ='0'
+				ORDER BY ob.obj_no DESC limit #{skip},10
+		</select>
+		<!-- 블라인드관리(관리자)리스트 페이징 토탈 -->
+		<select id="adminBlindTotal" resultType="int">
+			SELECT 
+				count(ob.obj_no)
+			FROM objection ob
+				left outer join interview i on ob.inter_no = i.inter_no 
+				left outer join job_posting jp on i.jpo_no = jp.jpo_no 
+				left outer join company com on jp.com_id = com.com_id 
+				left outer join resume re on i.re_no = re.re_no 
+				left outer join client cl on re.cl_id = cl.cl_id
+				where i.inter_blind ='0'
+		</select>
+		
+		
+		<!-- 블라인드관리(관리자)검색 페이징 -->
+			<select id="adminBlindSearch"  resultType="com.signal.all.dto.ObjectionDTO">
+			SELECT 
+						distinct cl.cl_id ,cl.cl_name,ob.obj_state,com.com_name,com.com_id,i.inter_no,i.inter_blind  
+			FROM objection ob
+				left outer join interview i on ob.inter_no = i.inter_no 
+				left outer join job_posting jp on i.jpo_no = jp.jpo_no 
+				left outer join company com on jp.com_id = com.com_id 
+				left outer join resume re on i.re_no = re.re_no 
+				left outer join client cl on re.cl_id = cl.cl_id 
+				where 1 and i.inter_blind ='0'
+			<if  test = "param1.equals('') and  !param2.equals('')"> 
+				AND (cl.cl_id LIKE CONCAT ('%',#{param2},'%') 
+				OR com.com_id LIKE CONCAT ('%',#{param2},'%')
+				OR com.com_name LIKE CONCAT ('%',#{param2},'%'))
+			</if>
+			<if  test = "!param2.equals('')">
+				<if test = "param1.equals('개인회원')">
+			      	AND cl.cl_id LIKE CONCAT ('%',#{param2},'%')
+			  	 </if>
+			  	 <if test ="param1.equals('기업회원')">
+			    	 AND com.com_id LIKE CONCAT ('%',#{param2},'%')
+			  	 </if>
+			  	  <if test ="param1.equals('기업명')">
+			    	 AND com.com_name LIKE CONCAT ('%',#{param2},'%')
+			  	 </if>
+			</if>
+			ORDER BY ob.obj_no DESC limit #{param3},10
+		</select>
+		<!-- 블라인드관리(관리자)검색 페이징 토탈 -->
+		<select id="adminBlindTotal2" resultType="int"  >
+			SELECT 
+						count(ob.obj_no)
+			FROM objection ob
+				left outer join interview i on ob.inter_no = i.inter_no 
+				left outer join job_posting jp on i.jpo_no = jp.jpo_no 
+				left outer join company com on jp.com_id = com.com_id 
+				left outer join resume re on i.re_no = re.re_no 
+				left outer join client cl on re.cl_id = cl.cl_id 
+				where 1 and i.inter_blind ='0'
+			<if  test = "param1.equals('') and  !param2.equals('')"> 
+				AND (cl.cl_id LIKE CONCAT ('%',#{param2},'%') 
+				OR com.com_id LIKE CONCAT ('%',#{param2},'%')
+				OR com.com_name LIKE CONCAT ('%',#{param2},'%'))
+			</if>
+			<if  test = "!param2.equals('')">
+				<if test = "param1.equals('개인회원')">
+			      	AND cl.cl_id LIKE CONCAT ('%',#{param2},'%')
+			  	 </if>
+			  	 <if test ="param1.equals('기업회원')">
+			    	 AND com.com_id LIKE CONCAT ('%',#{param2},'%')
+			  	 </if>
+			  	 <if test ="param1.equals('기업명')">
+			    	 AND com.com_name LIKE CONCAT ('%',#{param2},'%')
+			  	 </if>
+			</if>
+		</select>
+		
+		
+		
+		
+		
+		
+		<insert id="clientDbjectionRegDo" parameterType="hashmap">
+		INSERT INTO objection(obj_cl_content,inter_no) VALUES (#{obj_cl_content},#{inter_no} )
+		</insert>
+		
+		<update id="adminBlind" parameterType="String">
+		UPDATE interview
+		SET  inter_blind=0
+		WHERE inter_no =#{inter_no};
+		</update>
+		
+		<update id="adminBlindCancel" parameterType="String">
+		UPDATE interview
+		SET  inter_blind=1
+		WHERE inter_no =#{inter_no};
+		</update>
+		
+</mapper>

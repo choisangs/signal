@@ -1,0 +1,577 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.signal.jobposting.dao.JobPostingDAO">
+	
+	<!--  
+	<select id="login" resultType="String">
+      SELECT com_id FROM company WHERE com_id = #{param1} AND com_pw = #{param2}
+   </select>
+	-->
+	
+	<select id="ComDetail" resultType="String">
+		SELECT
+			ci_ceo
+		FROM
+			com_info
+		WHERE com_id = #{param1}
+	</select>
+	
+	<select id="infoCom" parameterType="String" resultType="com.signal.all.dto.JobPostingDTO">
+		SELECT com_name,com_id FROM company WHERE com_id = #{param1}
+	</select>
+	
+	<insert id="infoWrite" parameterType="com.signal.all.dto.JobPostingDTO">
+		INSERT INTO com_info(
+			com_id,ci_ceo,ci_web,ci_intro,ci_pass_intro,ci_emp,ci_photo
+		)VALUES(
+			#{com_id},#{ci_ceo},#{ci_web},#{ci_intro},#{ci_pass_intro},#{ci_emp},#{ci_photo}
+		)	
+	</insert>
+	
+	<select id="ComInfoDetail" parameterType="String" resultType="com.signal.all.dto.JobPostingDTO">
+		SELECT 
+			ci.ci_no,
+			com.com_id,
+			com.com_name,
+			ci.ci_ceo,
+			ci.ci_emp,
+			ci.ci_intro,
+			ci.ci_pass_intro,
+			ci.ci_photo,
+			ci.ci_web
+		FROM 
+			com_info ci
+		JOIN company com ON ci.com_id = com.com_id
+		WHERE com.com_id = #{param1} AND ci.ci_ceo = #{param2} AND ci.ci_no = #{param3}
+	</select>
+	
+	<select id="file" resultType="String">
+		SELECT ci_no FROM com_info WHERE com_id = #{param1}
+	</select>
+	
+	<select id="Detail" parameterType="String" resultType="com.signal.all.dto.JobPostingDTO">
+		SELECT 
+			ci.ci_no,
+			com.com_id,
+			com.com_name,
+			ci.ci_ceo,
+			ci.ci_emp,
+			ci.ci_intro,
+			ci.ci_pass_intro,
+			ci.ci_photo,
+			ci.ci_web
+		FROM 
+			com_info ci
+		JOIN company com ON ci.com_id = com.com_id
+		WHERE com.com_id = #{param1} AND ci.ci_ceo = #{param2} AND ci.ci_no = #{param3}
+	</select>
+	
+	<select id="comUpdate" parameterType="String" resultType="com.signal.all.dto.JobPostingDTO">
+		SELECT 
+			ci.ci_no,
+			com.com_id,
+			com.com_name,
+			ci.ci_ceo,
+			ci.ci_emp,
+			ci.ci_intro,
+			ci.ci_pass_intro,
+			ci.ci_photo,
+			ci.ci_web
+		FROM com_info ci
+		JOIN company com ON ci.com_id = com.com_id
+		WHERE ci.com_id = #{param1}
+	</select>
+	
+	<update id="update" parameterType="com.signal.all.dto.JobPostingDTO">
+			UPDATE com_info ci, company com SET 
+				ci.ci_ceo = #{ci_ceo},
+				com.com_name = #{com_name},
+				ci.ci_emp = #{ci_emp},
+				ci.ci_intro = #{ci_intro},
+				ci.ci_pass_intro = #{ci_pass_intro},
+				ci.ci_photo = CASE WHEN ci_photo != #{ci_photo} THEN #{ci_photo} ELSE ci_photo END,
+				ci.ci_web = #{ci_web}
+			WHERE ci.com_id = com.com_id AND ci.com_id = #{com_id}
+	</update>
+
+	<!-- 기업로고 사진 상세보기 -->
+   <select id="photoList" parameterType="String" resultType="com.signal.all.dto.JobPostingDTO">
+      SELECT ci_photo FROM com_info WHERE com_id = #{com_id}  
+   </select>
+	
+	<select id="infoList" parameterType="String" resultType="com.signal.all.dto.JobPostingDTO">
+		SELECT 
+	         c.com_name,
+	         ci.ci_photo,
+	         c.com_address,
+	         count(i.inter_no) AS apply,
+	         count(i.inter_comment) AS comment,
+         ROUND(count(i.inter_comment)*100/(count(i.inter_no)),0) AS comment_a 
+         FROM com_info ci 
+         left outer join company c on c.com_id = ci.com_id 
+         left outer join interview i on i.com_id  = c.com_id 
+         WHERE c.com_id = #{param1}; 
+	</select>
+	<!-- SELETE(count(inter_comment) FROM interview WHERE inter_comment IS NOT NULL) AS comment, -->
+	
+	
+		<select id="posting" parameterType="String" resultType="com.signal.all.dto.JobPostingDTO">
+		SELECT
+			ci.com_id
+		FROM
+			com_info ci
+		WHERE ci.com_id = #{param1}
+	</select>
+	
+		<insert id="postingWrite" parameterType="com.signal.all.dto.JobPostingDTO">
+		INSERT  
+			INTO job_posting
+				(com_id,jpo_title,jpo_type,jpo_region,jpo_field,jpo_start,jpo_deadline,jpo_state,
+				jpo_education,jpo_salary,jpo_contact,jpo_name,jpo_welfare,jpo_photo,jp_no,jc_no) 
+			VALUES
+				(#{com_id},#{jpo_title},#{jpo_type},#{jpo_region},#{jpo_field},#{jpo_start},#{jpo_deadline},#{jpo_state},
+				#{jpo_education},#{jpo_salary},#{jpo_contact},#{jpo_name},#{jpo_welfare},#{jpo_photo},#{jp_no},#{jc_no})
+
+	</insert>
+	
+		<select id="comPostingPasingTotal" resultType="int">
+			SELECT 
+				COUNT(jpo_no) 
+			FROM job_posting
+			WHERE com_id = #{com_id}
+		</select>
+	
+		<update id="upHit" parameterType="String">
+ 			UPDATE job_posting SET jpo_views = jpo_views+1 WHERE jpo_no = #{jpo_no}
+ 		</update>
+   		
+   		<update id="close">
+   			UPDATE job_posting SET 
+			jpo_state = if(jpo_deadline &lt; CURDATE() AND jpo_state != '마감', '마감', jpo_state)
+
+   			<!-- UPDATE 문에 if를 넣는 구문 > 모집마감일이 오늘날짜보다 전이고 진행중이라면 jpo_state는 마감이 된다. 조기마감을 한 경우 상태 유지. -->
+   			<!-- &lt; = <, &gt; = > -->   
+   			
+   		</update>
+	
+	 	<select id="jobPostingDetail" parameterType="String" resultType="com.signal.all.dto.JobPostingDTO">
+	   	SELECT 
+	   		co.com_id,
+	   		co.com_name,
+	   		jp.jpo_title,
+	   		jp.jpo_type,
+	   		jp.jpo_region,
+	   		jp.jpo_field,
+	   		jp.jpo_start,
+	   		jp.jpo_deadline,
+	   		jp.jpo_state,
+			jp.jpo_education,
+			jp.jpo_salary,
+			jp.jpo_contact,
+			jp.jpo_name,
+			jp.jpo_welfare,
+			jp.jpo_photo,
+			jp.jpo_views,
+			p.jp_no,
+			p.jp_hidden,
+			c.jc_hidden,
+			c.jc_no,
+			jp.jpo_no,
+			p.jp_name,
+			c.jc_name
+	   	FROM 
+	   		job_posting jp 
+	   		, job_pa p
+	   		, job_ch c 
+	   		,company co
+	   	WHERE 
+	   		jp.jpo_no = #{jpo_no} 
+	   		AND p.jp_no = jp.jp_no and c.jc_no = jp.jc_no and co.com_id = jp.com_id
+ 	</select>
+ 	
+	<!-- 채용공고 상세보기 사진 -->
+   <select id="postingPhoto" resultType="String">
+      SELECT jpo_photo FROM job_posting WHERE jpo_no = #{jpo_no}  
+   </select>
+ 	
+ 		<select id="UpdatePage" parameterType="String" resultType="com.signal.all.dto.JobPostingDTO">
+		 	SELECT 
+	   		co.com_id,
+	   		co.com_name,
+	   		jp.jpo_title,
+	   		jp.jpo_type,
+	   		jp.jpo_region,
+	   		jp.jpo_field,
+	   		jp.jpo_start,
+	   		jp.jpo_deadline,
+	   		jp.jpo_state,
+			jp.jpo_education,
+			jp.jpo_salary,
+			jp.jpo_contact,
+			jp.jpo_name,
+			jp.jpo_welfare,
+			jp.jpo_photo,
+			jp.jpo_views,
+			p.jp_no,
+			c.jc_no,
+			jp.jpo_no,
+			p.jp_name,
+			c.jc_name
+	   	FROM 
+	   		job_posting jp 
+	   		, job_pa p
+	   		, job_ch c 
+	   		,company co
+	   	WHERE 
+	   		jp.jpo_no = #{param2} 
+	   		AND p.jp_no = jp.jp_no and c.jc_no = jp.jc_no and co.com_id = #{param1}
+	</select>
+ 	
+ 		<update id="postingUpdate" parameterType="com.signal.all.dto.JobPostingDTO">
+			UPDATE 
+				job_posting jp, 
+				job_pa p, 
+				job_ch c,
+				company co 
+			SET 
+		   		jp.jpo_title = #{jpo_title},
+		   		jp.jpo_type = #{jpo_type},
+		   		jp.jpo_region = #{jpo_region},
+		   		jp.jpo_field = #{jpo_field},
+		   		jp.jpo_start = #{jpo_start},
+		   		jp.jpo_deadline = #{jpo_deadline},
+		   		jp.jpo_state = #{jpo_state},
+				jp.jpo_education = #{jpo_education},
+				jp.jpo_salary = #{jpo_salary},
+				jp.jpo_contact = #{jpo_contact},
+				jp.jpo_name = #{jpo_name},
+				jp.jpo_welfare = #{jpo_welfare},
+				jp.jpo_photo = CASE WHEN jpo_photo != #{jpo_photo} THEN #{jpo_photo} ELSE jpo_photo END,
+				jp.jp_no = #{jp_no},
+				jp.jc_no = #{jc_no},
+				jp.jpo_no = #{jpo_no}
+			WHERE jp.com_id = co.com_id AND jp.com_id = #{com_id} AND jp.jpo_no = #{jpo_no}
+	</update>
+	
+	
+	<select id="postingList" resultType="com.signal.all.dto.JobPostingDTO">
+		SELECT 
+			jpo_no,
+			jpo_title,
+			jpo_start,
+			jpo_deadline,
+			jpo_views,
+			jpo_state 
+		FROM job_posting jp 
+		LEFT OUTER JOIN company com ON com.com_id = jp.com_id 
+		WHERE jp.com_id = #{com_id} 
+		ORDER BY jpo_no DESC limit 10 OFFSET #{skip}
+	</select>
+	
+			<!-- 기업 채용공고 검색 페이징 -->
+		<select id="jobPostingSearch"  resultType="com.signal.all.dto.JobPostingDTO">
+			SELECT 
+				jpo_no,
+				jpo_title,
+				jpo_start,
+				jpo_deadline,
+				jpo_views,
+				jpo_state 
+			FROM job_posting jp 
+			LEFT OUTER JOIN company com ON com.com_id = jp.com_id 
+			WHERE jp.com_id = #{param3}
+			<if test = "param1.equals('') and  !param2.equals('')"> 
+				AND (jp.jpo_state LIKE CONCAT ('%',#{param1},'%'))
+			</if>
+		  	 <if test ="param1.equals('진행중')">
+		    	 AND jp.jpo_state LIKE CONCAT ('%',#{param1},'%')
+		  	 </if>
+		  	  <if test ="param1.equals('마감')">
+		    	 AND jp.jpo_state LIKE CONCAT ('%',#{param1},'%')
+		  	 </if>
+			ORDER BY jp.jpo_no DESC limit #{param2},10
+		</select>
+		
+		<select id="jobPostingListTotal2" resultType="int" >
+			SELECT 
+				count(jp.jpo_no) 
+			FROM job_posting jp 
+				LEFT OUTER JOIN company com ON com.com_id = jp.com_id 
+				WHERE jp.com_id = #{param2}
+			<if  test = "param1.equals('')"> 
+				AND jp.jpo_state LIKE CONCAT ('%',#{param1},'%')
+			</if>
+			<if  test = "!param1.equals('')">
+				<if test = "param1.equals('진행중')">
+			      	AND jp.jpo_state LIKE CONCAT ('%',#{param1},'%')
+			  	 </if>
+			  	 <if test ="param1.equals('마감')">
+			    	 AND jp.jpo_state LIKE CONCAT ('%',#{param1},'%')
+			  	 </if>
+			</if>
+		</select>
+	
+		<!-- 메인 채용공고 리스트 -->
+		<select id="mainPostingList" resultType="com.signal.all.dto.JobPostingDTO">
+		SELECT 
+			jp.jpo_no,
+			jp.jpo_title,
+			jp.jpo_start,
+			jp.jpo_deadline,
+			jp.jpo_views,
+			jp.jpo_state,
+			jp.jpo_region,
+			com.com_name,
+			com.com_id,
+			p.jp_name,
+			jc.jc_name 
+		FROM job_posting jp 
+		LEFT OUTER JOIN company com ON com.com_id = jp.com_id 
+		LEFT OUTER JOIN job_pa p ON p.jp_no = jp.jp_no 
+		LEFT OUTER JOIN job_ch jc ON jc.jc_no = jp.jc_no 
+		ORDER BY jpo_no DESC limit 10 OFFSET #{skip}
+	</select>
+	
+	<!-- 메인 채용공고 총 페이지 수-->
+	<select id="mainPostingPasingTotal" resultType="int">
+		SELECT 
+			COUNT(jpo_no) 
+		FROM job_posting
+	</select>
+	
+	<!-- 메인 페이지 채용공고에서 직무 대분류 리스트 호출 by태섭, 2022_08_21 -->
+	<select id="jobBigList" resultType="com.signal.all.dto.JobPostingDTO">
+	SELECT jp.jp_no, jp.jp_name, jp.jp_hidden 
+	FROM job_pa jp 
+	WHERE jp.jp_hidden = "1";
+	</select>
+	
+	<select id="jobMidList" resultType="com.signal.all.dto.JobPostingDTO">
+	SELECT jc.jc_no, jc.jc_name, jc.jc_hidden, jc.jp_no 
+	FROM job_ch jc 
+	WHERE jc.jc_hidden = "1";
+	</select>
+	
+	<select id="jobMidList2" resultType="com.signal.all.dto.JobPostingDTO">
+	SELECT jc.jc_no, jc.jc_name, jc.jc_hidden, jc.jp_no 
+	FROM job_ch jc 
+	WHERE jc.jc_hidden = "1" AND jc.jp_no = #{param1};
+	</select>	
+	
+	<select id="jobPostingMainSearch"  resultType="com.signal.all.dto.JobPostingDTO">
+				SELECT 
+					jp.jpo_no,
+					jp.jpo_title,
+					jp.jpo_start,
+					jp.jpo_deadline,
+					jp.jpo_views,
+					jp.jpo_state,
+					jp.jpo_region,
+					com.com_name,
+					jp.jc_no,
+					jc.jc_name,
+					p.jp_name,
+					p.jp_no,
+					jp.com_id 
+				FROM job_posting jp 
+				LEFT OUTER JOIN company com ON com.com_id = jp.com_id 
+				LEFT OUTER JOIN job_pa p ON p.jp_no = jp.jp_no 
+				LEFT OUTER JOIN job_ch jc ON jc.jc_no = jp.jc_no 
+				<if test = "!param1.equals('') and param2.equals('') and param3.equals('')"> 
+					WHERE jp.jpo_region LIKE CONCAT ('%',#{param1},'%')
+				</if>
+				<if test = "param1.equals('') and !param2.equals('') and param3.equals('')"> 
+					WHERE p.jp_no = #{param2}
+				</if>
+				<if test = "param1.equals('') and param2.equals('') and !param3.equals('')"> 
+					WHERE com.com_name LIKE CONCAT ('%',#{param3},'%')
+				</if>
+				<if test = "!param1.equals('') and !param2.equals('') and param3.equals('')"> 
+					WHERE jp.jpo_region LIKE CONCAT ('%',#{param1},'%')
+					AND p.jp_no = #{param2}
+				</if>
+				<if test = "!param1.equals('') and param2.equals('') and !param3.equals('')"> 
+					WHERE jp.jpo_region LIKE CONCAT ('%',#{param1},'%')
+					AND com.com_name LIKE CONCAT ('%',#{param3},'%')
+				</if>
+				<if test = "param1.equals('') and !param2.equals('') and !param3.equals('')"> 
+					WHERE p.jp_no = #{param2}
+					AND com.com_name LIKE CONCAT ('%',#{param3},'%')
+				</if>
+				<if test = "!param1.equals('') and !param2.equals('') and !param3.equals('')"> 
+					WHERE jp.jpo_region LIKE CONCAT ('%',#{param1},'%')
+					AND p.jp_no = #{param2}
+					AND com.com_name LIKE CONCAT ('%',#{param3},'%')
+				</if>
+			ORDER BY jp.jpo_no DESC limit #{param4},10
+		</select>
+	
+	
+	
+			<!-- 메인 채용공고 검색 페이징 
+			<select id="jobPostingMainSearch"  resultType="com.signal.all.dto.JobPostingDTO">
+				SELECT 
+					jp.jpo_no,
+					jp.jpo_title,
+					jp.jpo_start,
+					jp.jpo_deadline,
+					jp.jpo_views,
+					jp.jpo_state,
+					jp.jpo_region,
+					com.com_name
+					
+				FROM job_posting jp 
+				LEFT OUTER JOIN company com ON com.com_id = jp.com_id 
+				<if test = "param1.equals('') and param2.equals('') and param3.equals('')"> 
+					AND (jpo_region LIKE CONCAT ('%',#{param1},'%')
+					OR jpo_region LIKE CONCAT ('%',#{param1},'%')
+					OR jpo_region LIKE CONCAT ('%',#{param1},'%')
+					)
+				</if>
+			  	 <if test ="param1.equals('진행중')">
+			    	 AND jp.jpo_state LIKE CONCAT ('%',#{param1},'%')
+			  	 </if>
+			  	  <if test ="param1.equals('마감')">
+			    	 AND jp.jpo_state LIKE CONCAT ('%',#{param1},'%')
+			  	 </if>
+			ORDER BY jp.jpo_no DESC limit #{param2},10
+		</select>
+		-->
+		
+	<select id="jobPostingMainTotal" resultType="int" >
+			SELECT 
+				count(jpo_no) 
+			FROM job_posting jp 
+			LEFT OUTER JOIN company com ON com.com_id = jp.com_id 
+			LEFT OUTER JOIN job_pa p ON p.jp_no = jp.jp_no 
+			LEFT OUTER JOIN job_ch jc ON jc.jc_no = jp.jc_no 
+			<if test = "!param1.equals('') and param2.equals('') and param3.equals('')"> 
+					WHERE jp.jpo_region LIKE CONCAT ('%',#{param1},'%')
+				</if>
+				<if test = "param1.equals('') and !param2.equals('') and param3.equals('')"> 
+					WHERE p.jp_no = #{param2}
+				</if>
+				<if test = "param1.equals('') and param2.equals('') and !param3.equals('')"> 
+					WHERE com.com_name LIKE CONCAT ('%',#{param3},'%')
+				</if>
+				<if test = "!param1.equals('') and !param2.equals('') and param3.equals('')"> 
+					WHERE jp.jpo_region LIKE CONCAT ('%',#{param1},'%')
+					AND p.jp_no = #{param2}
+				</if>
+				<if test = "!param1.equals('') and param2.equals('') and !param3.equals('')"> 
+					WHERE jp.jpo_region LIKE CONCAT ('%',#{param1},'%')
+					AND com.com_name LIKE CONCAT ('%',#{param3},'%')
+				</if>
+				<if test = "param1.equals('') and !param2.equals('') and !param3.equals('')"> 
+					WHERE p.jp_no = #{param2}
+					AND com.com_name LIKE CONCAT ('%',#{param3},'%')
+				</if>
+				<if test = "!param1.equals('') and !param2.equals('') and !param3.equals('')"> 
+					WHERE jp.jpo_region LIKE CONCAT ('%',#{param1},'%')
+					AND p.jp_no = #{param2}
+					AND com.com_name LIKE CONCAT ('%',#{param3},'%')
+				</if>
+		</select>	
+
+
+
+
+	<select id="PostingDetailMainPage" parameterType="String" resultType="com.signal.all.dto.JobPostingDTO">
+		SELECT 
+         	jp.jpo_title,
+            jp.jpo_type,
+            jp.jpo_region,
+            jp.jpo_field,
+            jp.jpo_start,
+            jp.jpo_deadline,
+            jp.jpo_state,
+	        jp.jpo_education,
+	        jp.jpo_salary,
+	        jp.jpo_contact,
+	        jp.jpo_name,
+	        jp.jpo_welfare,
+	        jp.jpo_photo,
+	        jp.jpo_views,
+	        co.com_id,
+            co.com_name,
+            r.re_no,
+	        p.jp_name,
+	        c.jc_name,
+	        jp.jpo_no,
+	        ci.ci_web,
+	        ci.ci_photo,
+	        count(i.inter_no) as apply_no,
+	        count(i.inter_no) AS apply,
+	        count(i.inter_comment) AS comment,
+	        ROUND(count(i.inter_comment)*100/(count(i.inter_no)),0) AS comment_a 
+	      FROM job_posting jp 
+	      LEFT OUTER JOIN company co ON co.com_id = jp.com_id 
+	      LEFT OUTER JOIN interview i ON i.com_id = jp.com_id 
+	      LEFT OUTER JOIN com_info ci ON ci.com_id = co.com_id 
+	      LEFT OUTER JOIN job_pa p ON p.jp_no = jp.jp_no 
+	      LEFT OUTER JOIN job_ch c ON c.jc_no = jp.jc_no
+	      LEFT OUTER JOIN resume r on r.re_no = i.re_no 
+      WHERE jp.jpo_no = #{param1} AND jp.com_id = #{param2} AND inter_result IS NOT NULL;
+ 	</select>
+	
+	<select id="mainList"  parameterType="String" resultType="hashmap">
+		SELECT 
+			jp.jpo_no,
+			jp.jpo_title,
+           	jp.jpo_start,
+           	jp.jpo_deadline,
+           com.com_name
+		FROM job_posting jp 
+		LEFT OUTER JOIN company com ON com.com_id = jp.com_id 
+		WHERE (jpo_start BETWEEN #{param1} AND #{param2}) OR (jpo_deadline BETWEEN #{param1} AND #{param2})
+	</select>
+	
+	
+<!-- 	<select id="infoList" parameterType="String" resultType="com.signal.all.dto.JobPostingDTO">
+		SELECT 
+			com.com_name,
+			ci.ci_photo,
+			com.com_address,
+			com.com_id
+		FROM 
+			com_info ci
+		JOIN company com ON ci.com_id = com.com_id
+		WHERE com.com_id = #{param1}
+	</select> -->
+	
+	
+	
+	<!-- <insert id="info" parameterType="hashmap">
+		INSERT INTO com_info(
+			ci_ceo,
+			ci_emp,
+			ci_web,
+			ci_intro,
+			ci_pass_intro
+		) VALUES(
+			#{ci_ceo},
+			#{ci_emp},
+			#{ci_web},
+			#{ci_intro},
+			#{ci_pass_intro}
+		)
+	</insert> -->
+	
+<!-- 	<insert id="infoWrite" parameterType="hashmap">
+		<selectKey keyProperty="com_no" resultType="String">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		
+		INSERT INTO com_ifo(
+			ci_ceo,
+			ci_emp,
+			ci_web,
+			ci_photo,
+			ci_intro,
+			ci_pass_intro,
+			
+		)
+	</insert> -->
+	
+</mapper>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+		http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd">
+
+
+	<!-- 마이바티스 사용 설정  -->
+	<!--  name = 필수요소(이름이 정해져 있음)/ id = 선택요소 (이름이 정해져 있지 않음) -->
+	<!-- 어떤 DB를 쓸건지 정보 제공 -->
+	<!-- 쿼리문(xml) 이 어디에 있는지 지정 -->
+	<!-- mapper 위치 -->
+	
+	<!-- list를 활용하면 전혀 다른 패키지 경로도 등록 가능 예) com.gudi.member.dao  -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="datasource"/>
+		<property name="mapperLocations">
+			<list>
+				<value>classpath:com/signal/main/dao/*.xml</value>
+				<value>classpath:com/signal/member/dao/*.xml</value>
+				<value>classpath:com/signal/resume/dao/*.xml</value>
+				<value>classpath:com/signal/recommend/dao/*.xml</value>
+				<value>classpath:com/signal/test/dao/*.xml</value>
+				<value>classpath:com/signal/jobposting/dao/*.xml</value>
+				<value>classpath:com/signal/enter/dao/*.xml</value>
+				<value>classpath:com/signal/interview/dao/*.xml</value>
+				<value>classpath:com/signal/job/dao/*.xml</value>
+				<value>classpath:com/signal/objection/dao/*.xml</value>
+			</list>
+		</property>
+		<property name="configLocation" value="classpath:config/aliase.xml"></property>
+	</bean>
+	
+	<!-- 간편 사용 설정 (마이바티스 사용하는 패키지 범위) -->
+	<!-- 빈체크여부, 패키지 정보(실제 존재하는 패키지 인지도 꼭 확인) -->
+	<mybatis-spring:scan base-package="com.signal.main.dao"/>
+	<mybatis-spring:scan base-package="com.signal.member.dao"/>
+	<mybatis-spring:scan base-package="com.signal.resume.dao"/>
+	<mybatis-spring:scan base-package="com.signal.recommend.dao"/>
+	<mybatis-spring:scan base-package="com.signal.test.dao"/>
+	<mybatis-spring:scan base-package="com.signal.jobposting.dao"/>
+	<mybatis-spring:scan base-package="com.signal.enter.dao"/>
+	<mybatis-spring:scan base-package="com.signal.interview.dao"/>
+	<mybatis-spring:scan base-package="com.signal.job.dao"/>
+	<mybatis-spring:scan base-package="com.signal.objection.dao"/>
+
+</beans>
